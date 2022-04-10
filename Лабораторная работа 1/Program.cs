@@ -133,14 +133,8 @@ namespace Лабораторная_работа_1
         {
             switch (fileformat)
             {
-                case "JSON":
-                    return new TJSONfile();
-                    break;
-
-                case "XML":
-                    return new TXMLfile();
-                    break;
-
+                case "JSON": return new TJSONfile();
+                case "XML": return new TXMLfile();
                 default: return null;
             }
         }
