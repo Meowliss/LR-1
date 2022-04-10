@@ -10,9 +10,9 @@ using System.IO;
 using System.Xml.Serialization;
 
 
+
 namespace Лабораторная_работа_1
 {
-
     public class Poem
     {
         public string Name { get; set; }
@@ -47,44 +47,50 @@ namespace Лабораторная_работа_1
             elements.Add(PoemPattern);
         }
 
-        public static List<Poem> LoadFromFileJson()
+         public interface Ifmtfile
         {
-            string filejson = System.IO.File.ReadAllText(@"C:\Users\79859\Desktop\coding\Лабораторная работа 1\files\filejson.json");
-            List<Poem> elements = JsonSerializer.Deserialize<List<Poem>>(filejson);
-            return elements;
+            public abstract List<Poem> LoadFromFile(string filename);
+            public abstract void SaveToFile(List<Poem> elements, string filename);
         }
-        /*
-        public static List<Poem> LoadFromFileXml()
+
+        class TJSONfile : Ifmtfile
         {
-            XmlSerializer formatter = new XmlSerializer(typeof(List<Poem>));
-            using (FileStream filexml = new FileStream(@"C:\Users\79859\Desktop\coding\Лабораторная работа 1\files\filexml.xml", FileMode.OpenOrCreate))
+            public List<Poem> LoadFromFile(string filename)
             {
-                List<Poem> elements = (List<Poem>)formatter.Deserialize(filexml);
+                List<Poem> elements = JsonSerializer.Deserialize<List<Poem>>(filename);
                 return elements;
             }
-        }
-        */
-
-        public static void SaveToFileJson(List<Poem> elements)
-        {
-            var options = new JsonSerializerOptions
+            public void SaveToFile(List<Poem> elements, string filename)
             {
-                Encoder = JavaScriptEncoder.Create(UnicodeRanges.BasicLatin, UnicodeRanges.Cyrillic),
-                WriteIndented = true
-            };
-            string filejson = JsonSerializer.Serialize(elements, options);
-            File.WriteAllText(@"C:\Users\79859\Desktop\coding\Лабораторная работа 1\files\newfilejson.json", filejson);
-        }
-        /*
-        public static void SaveToFileXml(List<Poem> elements)
-        {
-            XmlSerializer formatter = new XmlSerializer(typeof(List<Poem>));
-            using (FileStream filexml = new FileStream(@"C:\Users\79859\Desktop\coding\Лабораторная работа 1\files\newfilexml.xml",FileMode.OpenOrCreate))
-            {
-                formatter.Serialize(filexml, elements);
+                var options = new JsonSerializerOptions
+                {
+                    Encoder = JavaScriptEncoder.Create(UnicodeRanges.BasicLatin, UnicodeRanges.Cyrillic),
+                    WriteIndented = true
+                };
+                string filejson = JsonSerializer.Serialize(elements, options);
+                File.WriteAllText(filename, filejson);
             }
         }
-        */
+        class TXMLfile : Ifmtfile
+        {
+            public List<Poem> LoadFromFile(string filename)
+            {
+                XmlSerializer formatter = new XmlSerializer(typeof(List<Poem>));
+                using (FileStream filexml = new FileStream(filename, FileMode.OpenOrCreate))
+                {
+                    List<Poem> elements = (List<Poem>)formatter.Deserialize(filexml);
+                    return elements;
+                }
+            }
+            public void SaveToFile(List<Poem> elements, string filename)
+            {
+                XmlSerializer formatter = new XmlSerializer(typeof(List<Poem>));
+                using (FileStream filexml = new FileStream(filename, FileMode.OpenOrCreate))
+                {
+                    formatter.Serialize(filexml, elements);
+                }
+            }
+        }
 
         public static void PrintResilt(List<Poem> elements)
         {
@@ -97,21 +103,46 @@ namespace Лабораторная_работа_1
             }
         }
 
+        
+
         static void Main(string[] args)
         {
             var elements = new List<Poem>(); // создание коллекции лист с объектами poem 
 
-            //CreateTestElements(elements); //создание тестовых элементов 
+            CreateTestElements(elements); //создание тестовых элементов 
 
             //elements = LoadFromFileXml(); // получение и конвертация файла xml
 
             //PrintResilt(elements); // вывод файла в консоль
 
             //SaveToFileXml(elements); // сохранение файла xml
-             
+
+            string loadFile = @"C:\Users\mikl\Desktop\Алиска\file.json";
+            string SaveFile = @"C:\Users\mikl\Desktop\Алиска\test";
+
+            Ifmtfile fmtfile = GetFmt("JSON");
+
+            fmtfile.SaveToFile(elements, SaveFile);            
+
             Console.ReadLine();
 
             
+        }
+
+        public static Ifmtfile GetFmt(string fileformat)
+        {
+            switch (fileformat)
+            {
+                case "JSON":
+                    return new TJSONfile();
+                    break;
+
+                case "XML":
+                    return new TXMLfile();
+                    break;
+
+                default: return null;
+            }
         }
     }
 }
