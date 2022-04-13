@@ -11,6 +11,7 @@ using System.Xml.Serialization;
 using ClosedXML.Excel;
 using Microsoft.Office.Interop.Excel;
 using Range = Microsoft.Office.Interop.Excel.Range;
+using Microsoft.VisualBasic.FileIO;
 
 namespace Лабораторная_работа_1
 {
@@ -131,6 +132,24 @@ namespace Лабораторная_работа_1
                 wb.SaveAs(filename);
             }
         }
+        class TCSVfile : Ifmtfile
+        {
+            public List<Poem> LoadFromFile(string filename)
+            {
+                
+                List<Poem> elements = JsonSerializer.Deserialize<List<Poem>>(filename); // временный код
+                return elements; // временный код
+            }
+            public void SaveToFile(List<Poem> elements, string filename)
+            {
+                StringBuilder csvcontent = new StringBuilder();
+                for (int i = 0; i < elements.Count; i++)
+                {
+                    csvcontent.AppendLine(elements[i].Name + ";" + elements[i].Author + ";" + elements[i].Year + ";" + elements[i].Body); 
+                }
+                File.AppendAllText(filename, csvcontent.ToString(), Encoding.UTF8);
+            }
+        }
 
 
         public static void PrintResilt(List<Poem> elements)
@@ -149,40 +168,27 @@ namespace Лабораторная_работа_1
         static void Main(string[] args)
         {
             var elements = new List<Poem>(); // создание коллекции лист с объектами poem 
-
-            //CreateTestElements(elements); //создание тестовых элементов 
-
+            CreateTestElements(elements); //создание тестовых элементов 
             //PrintResilt(elements); // вывод файла в консоль
 
 
             /*
             string choiceformat = Console.ReadLine(); // выбор формата
-
-            string SaveFile = @"C:\Users\79859\Desktop\coding\files\test."+ choiceformat; // место сохранения 
-
+            string SaveFile = @"C:\Users\79859\Desktop\coding\files\filecsv."+ choiceformat; // место сохранения 
             Ifmtfile savefmtfile = GetFmt(choiceformat); // создание объекта типа Ifmtfile, выделение места для типа json
-
             savefmtfile.SaveToFile(elements, SaveFile); // сохранение файла в выбранном формате
-
             Console.ReadLine();
             */
+
 
             
             //string LoadFile = System.IO.File.ReadAllText(@"C:\Users\79859\Desktop\coding\files\filexlsx.xlsx"); // форматируемый файл
-            string getextension = Path.GetExtension(@"C:\Users\79859\Desktop\coding\files\filexlsx.xlsx").Substring(1); // определение формата файла
+            string getextension = Path.GetExtension(@"C:\Users\79859\Desktop\coding\files\filecsv.csv").Substring(1); // определение формата файла
             Ifmtfile loadfmtfile = GetFmt(getextension);
-            elements = loadfmtfile.LoadFromFile(@"C:\Users\79859\Desktop\coding\files\filexlsx.xlsx");           
+            elements = loadfmtfile.LoadFromFile(@"C:\Users\79859\Desktop\coding\files\filecsv.csv");           
             PrintResilt(elements);
             Console.ReadLine();
-
-
-            /*
-            string choiceformat = Console.ReadLine();
-            string SaveFile = @"C:\Users\79859\Desktop\coding\files\fileTEST." + choiceformat;
-            Ifmtfile savefmtfile = GetFmt(choiceformat);
-            savefmtfile.SaveToFile(elements, SaveFile);
-            Console.ReadLine();
-            */
+                        
         }
 
         public static Ifmtfile GetFmt(string fileformat)
@@ -192,7 +198,7 @@ namespace Лабораторная_работа_1
                 case "json": return new TJSONfile();
                 case "xml": return new TXMLfile();
                 case "xlsx": return new TXLSXfile();
-                //case "csv": return new TCSVfile();
+                case "csv": return new TCSVfile();
                 default: return null;
             }
         }
